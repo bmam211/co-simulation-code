@@ -1,4 +1,4 @@
-"""Co-simulation framework module. Contains Model, Controller, and Manager classes for running the co-simulation."""
+"""Co-simulation framework module. Contains Model and Manager classes for running the co-simulation."""
 
 class Model:
     """Wrapper class for modeling any physical process (e.g. power flow, heat production, etc.)."""
@@ -13,7 +13,7 @@ class Model:
     
 
 class Manager:
-    """The central manager for the co-simulated system."""
+    """The orchestrator manager for managing the data exchanged between the coupled models."""
     
     def __init__(self, models: list[Model]):
         self.models = models
