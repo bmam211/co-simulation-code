@@ -17,6 +17,7 @@ class Manager:
     
     def __init__(self, models: list[Model]):
         self.models = models
+        self.controller = models[-1]  # Last model is the controller
 
     def run_simulation(self, time_steps: int, initial_power_setpoint: float, initial_temperature: float):
         power_setpoint = initial_power_setpoint
@@ -31,13 +32,14 @@ class Manager:
                 model_output = model.calculate(power_setpoint)
                 model_outputs.append(model_output)
 
-            # Assuming first output is voltage and second is heat_output
+            # Assuming first output is voltage, second is heat_output, and third is heat_loss
             voltage = model_outputs[0]
             heat_output = model_outputs[1]
+            heat_loss = model_outputs[2]
 
             # Adjust power setpoint using the controller
-            power_setpoint, temperature =  self.models[-1].calculate(
-                power_setpoint, voltage, heat_output, temperature
+            power_setpoint, temperature =  self.controller.calculate(
+                power_setpoint, voltage, heat_output, temperature, heat_loss,
             )
             print("-----------------------------------------------------------")
             print(f"New power setpoint: {power_setpoint}")
