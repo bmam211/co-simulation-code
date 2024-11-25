@@ -3,13 +3,15 @@
 class Model:
     """Wrapper class for modeling any physical process (e.g. power flow, heat production, etc.)."""
     
-    def __init__(self, process_function):
-        """Takes in a function that models a physical process."""
-        self.process_function = process_function
+    def __init__(self, process_model):
+        """Takes in the model of a physical process as a function or callable class."""
+        if not callable(process_model):
+            raise ValueError("The process must be a function or callable class.")
+        self.process_model = process_model
 
     def calculate(self, *args) -> float:
         """Call the process function to perform calculations on an arbitrary number of inputs."""
-        return self.process_function(*args)
+        return self.process_model(*args)
     
 
 class Manager:
@@ -21,26 +23,29 @@ class Manager:
 
     def run_simulation(self, time_steps: int, initial_power_setpoint: float, initial_temperature: float):
         power_setpoint = initial_power_setpoint
-        temperature = initial_temperature
-
+        room_temperature = initial_temperature
+        print("===============================================================")
+        print(f"Starting simulation with initial power_setpoint: {power_setpoint} and initial temperature: {room_temperature}")
+        print("===============================================================")
         for t in range(time_steps):
             print(f"Time step {t}:")
 
             # Get model outputs for the current power setpoint
             model_outputs = []
-            for model in self.models[:-1]:  # First exclude the controller
+            for model in self.models[:-2]:  # Iterate over grid and heat pump models (exclude room and controller)
                 model_output = model.calculate(power_setpoint)
                 model_outputs.append(model_output)
 
-            # Assuming first output is voltage, second is heat_output, and third is heat_loss
-            voltage = model_outputs[0]
-            heat_output = model_outputs[1]
-            heat_loss = model_outputs[2]
+            # Assuming first output is voltage and second output is room temperature
+            voltage = model_outputs[0]  # Current voltage based on current power setpoint of heat pump
+            heat_production_from_hp = model_outputs[1]  # Heat production from heat pump based on power setpoint
+            room_temperature = self.models[2].calculate(heat_production_from_hp)  # Update room temperature
 
             # Adjust power setpoint using the controller
-            power_setpoint, temperature =  self.controller.calculate(
-                power_setpoint, voltage, heat_output, temperature, heat_loss,
-            )
+            power_setpoint, converge =  self.controller.calculate(power_setpoint, voltage, room_temperature)
+            if converge:
+                print("Simulation converged. Voltage and temperature within limits.")
+                break
             print("-----------------------------------------------------------")
             print(f"New power setpoint: {power_setpoint}")
             print("===========================================================")
