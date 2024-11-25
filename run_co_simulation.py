@@ -38,8 +38,8 @@ def controller_function(power_set_point_hp: float, voltage: float, temperature: 
     # Boundary conditions
     voltage_min, voltage_max = 10, 20 
     temp_min, temp_max = 18, 25
-    p_adjust_step_size_voltage = 100  # Step size for power setpoint adjustment for voltage correction
-    p_adjust_step_size_temp = 100  # Step size for power setpoint adjustment for temperature correction
+    p_adjust_step_size_voltage = 70  # Step size for power setpoint adjustment for voltage correction
+    p_adjust_step_size_temp = 20  # Step size for power setpoint adjustment for temperature correction
 
     # Log current state of the system
     print(f"Current power setpoint of the heat pump: {power_set_point_hp}")
