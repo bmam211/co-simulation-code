@@ -14,18 +14,27 @@ def heat_pump_function(power_setpoint: float) -> float:
     return heat_production
 
 
-# Room model is implemented as a class to keep track of the room temperature
+# Updated RoomFunction class for discrete temperature dynamics
 class RoomFunction:
-    """A class to model the temperature of a building over time."""
-    def __init__(self, initial_temperature: float):
-        """Initialize the Room with the given initial temperature."""
-        self.temperature = initial_temperature
+    """A class to model the temperature of a room over time."""
+    def __init__(self, initial_temperature: float, C_room: float, R_thermal: float, T_env: float, delta_t: float):
+        """Initialize the Room with thermal properties and initial temperature."""
+        self.temperature = initial_temperature  # Room temperature (°C)
+        self.C_room = C_room  # Thermal capacitance (J/°C)
+        self.R_thermal = R_thermal  # Thermal resistance (°C/W)
+        self.T_env = T_env  # Ambient temperature (°C)
+        self.delta_t = delta_t  # Time step (seconds)
 
     def __call__(self, heat_production_from_hp: float) -> float:
-        """Callable method to update the room temperature during the simulation."""
-        heat_loss = 0.09 * heat_production_from_hp
-        net_heat_supplied = heat_production_from_hp - heat_loss
-        self.temperature += net_heat_supplied * 0.009  # Temperature change as a function of net heat supplied
+        """
+        Callable method to update the room temperature during the simulation.
+        :param heat_production_from_hp: Heat input from the heat pump (W)
+        :return: Updated room temperature (°C)
+        """
+        # Calculate heat loss to the environment
+        Q_loss = (self.temperature - self.T_env) / self.R_thermal
+        # Update room temperature using the discrete-time equation
+        self.temperature += self.delta_t * (heat_production_from_hp - Q_loss) / self.C_room
         return self.temperature
 
 
@@ -35,7 +44,7 @@ def controller_function(power_set_point_hp: float, voltage: float, temperature: 
     The controller is used to adjust the power setpoint of the heat pump based boundary conditions.
     """
     # Boundary conditions
-    voltage_min, voltage_max = 10, 20 
+    voltage_min, voltage_max = 10, 20
     temp_min, temp_max = 18, 25
     p_adjust_step_size_voltage = 70  # Step size for power setpoint adjustment for voltage correction
     p_adjust_step_size_temp = 20  # Step size for power setpoint adjustment for temperature correction
@@ -68,14 +77,21 @@ def controller_function(power_set_point_hp: float, voltage: float, temperature: 
 
 
 # Initialize simulation parameters
-initial_power_set_point_hp = 100
-initial_temperature = 20
-time_steps = 10
+initial_power_set_point_hp = 300
+initial_temperature_room = 15
+start_time = 0  # Time in seconds
+end_time = 20  # Time in seconds
+delta_t = 0.1  # Time step in seconds
+
+# Parameters for RoomFunction
+C_room = 500  # Thermal capacitance (J/°C)
+R_thermal = 1.0  # Thermal resistance (°C/W)
+T_env = 20  # Ambient temperature (°C)
 
 # Create model instances by wrapping the functions with the Model class 
 electric_grid_model = Model(electric_grid_function)
 heat_pump_model = Model(heat_pump_function)
-room_model = Model(RoomFunction(initial_temperature))
+room_model = Model(RoomFunction(initial_temperature_room, C_room, R_thermal, T_env, delta_t))
 controller_model = Model(controller_function)
 
 # Create a manager instance with the models and controller
@@ -83,4 +99,4 @@ models = [electric_grid_model, heat_pump_model, room_model, controller_model]
 manager = Manager(models)
 
 # Run co-simulation
-manager.run_simulation(time_steps, initial_power_set_point_hp, initial_temperature)
+manager.run_simulation(start_time, delta_t, end_time, initial_power_set_point_hp, initial_temperature_room)

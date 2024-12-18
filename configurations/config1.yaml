@@ -1,0 +1,20 @@
+DiscreteTimeSimulation:
+  config_id: 2  # Unique configuration id (plotted results will be saved with this id)
+  time:
+    start_time: 0  # Start time (seconds)
+    end_time: 50  # End time (seconds)
+    delta_t: 0.1  # Time step (seconds)
+  initial_conditions:
+    heat_pump:
+      power_set_point: 100
+    room:
+      temperature: 15
+      thermal_capacitance: 500  # Represents how much heat is needed for a 1°C temperature increase.
+      thermal_resistance: 1.0  # Represents how well the room is insulated (higher R = better insulation).
+  boundary_conditions:
+    minimum_voltage: 0  # Minimum voltage at the grid connection point.
+    maximum_voltage: 230  # Maximum voltage at the grid connection point.
+    minimum_temperature: 15  # Minimum temperature in the room.
+    maximum_temperature: 25  # Maximum temperature in the room.
+  global_conditions:
+    ambient_temperature: 15  # Temperature outside the room.
