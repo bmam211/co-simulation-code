@@ -42,10 +42,7 @@ class Manager:
             room_temperature = self.models[2].calculate(heat_production_from_hp)  # Update room temperature
 
             # Adjust power setpoint using the controller
-            power_setpoint, converge =  self.controller.calculate(power_setpoint, voltage, room_temperature)
-            if converge:
-                print("Simulation converged. Voltage and temperature within limits.")
-                break
+            power_setpoint =  self.controller.calculate(power_setpoint, voltage, room_temperature)
             print("-----------------------------------------------------------")
             print(f"New power setpoint: {power_setpoint}")
             print("===========================================================")
