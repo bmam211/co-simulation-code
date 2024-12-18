@@ -15,7 +15,11 @@ class Model:
     
 
 class Manager:
-    """The orchestrator manager for managing the data exchanged between the coupled models."""
+    """The orchestrator manager for managing the data exchanged between the coupled models.
+    
+    NOTE: Currently, it is hardcoded to work with a particular sequence of execution of the coupled
+    models as define in run_co_simulation.py.
+    """
     
     def __init__(self, models: list[Model]):
         self.models = models
