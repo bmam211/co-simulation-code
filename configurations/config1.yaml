@@ -1,9 +1,9 @@
 InitializationSettings:
   config_id: 1  # Unique configuration id (plotted results will be saved with this id)
   time:
-    start_time: 0  # Start time (seconds)
-    end_time: 50  # End time (seconds)
-    delta_t: 2  # Time step (seconds)
+    start_time: 0  # Start time (minutes)
+    end_time: 1440  # End time (minutes, 24 hours)
+    delta_t: 60  # Time step (minutes)
   initial_conditions:
     heat_pump:
       power_set_point: 100

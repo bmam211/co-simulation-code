@@ -87,10 +87,10 @@ class Manager:
         _, axs = plt.subplots(2, 2, figsize=(12, 8))
 
         plots = [
-            (axs[0, 0], times, voltages, "Voltage Over Time", "Time [s]", "Voltage [V]", 'blue'),
-            (axs[0, 1], times, temperatures, "Temperature Over Time", "Time [s]", "Temperature [°C]", 'red'),
-            (axs[1, 0], times, power_setpoints, "Heat Pump Power Setpoint Over Time", "Time [s]", "Power Setpoint [kW]", 'green'),
-            (axs[1, 1], times, heat_productions, "Heat Production Over Time", "Time [s]", "Heat Production [kW]", 'orange'),
+            (axs[0, 0], times, voltages, "Voltage Over Time", "Time [min]", "Voltage [V]", 'blue'),
+            (axs[0, 1], times, temperatures, "Temperature Over Time", "Time [min]", "Temperature [°C]", 'red'),
+            (axs[1, 0], times, power_setpoints, "Heat Pump Power Setpoint Over Time", "Time [min]", "Power Setpoint [kW]", 'green'),
+            (axs[1, 1], times, heat_productions, "Heat Production Over Time", "Time [min]", "Heat Production [kW]", 'orange'),
         ]
 
         for ax, x, y, title, xlabel, ylabel, color in plots:
