@@ -16,10 +16,7 @@ class RoomFunction:
 
     def __call__(self, heat_production_from_hp: float) -> float:
         """
-        Callable method to update the room temperature during the simulation.
-        :param heat_production_from_hp: Heat input from the heat pump (W)
-        :return: Updated room temperature (°C)
-        """
+        Callable method to update the room temperature during the simulation."""
         # Calculate heat loss to the environment
         heat_loss = (self.room_temp - self.outside_temp) / self.room_tr
 
