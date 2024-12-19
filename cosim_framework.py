@@ -23,15 +23,20 @@ class Manager:
     models as define in run_co_simulation.py.
     """
     
-    def __init__(self, models: list[Model]):
+    def __init__(self, models: list[Model], settings_configuration: dict):
         self.models = models
         self.controller = models[-1]  # Last model is the controller
+        self.settings_configuration = settings_configuration
 
-    def run_simulation(
-        self, start_time: float, delta_t: float, end_time: float, init_p_setpoint_hp: float, init_temp_room: float
-    ):
-        hp_power_setpoint = init_p_setpoint_hp
-        room_temperature = init_temp_room
+    def run_simulation(self):
+        # Extract the relevant simulation parameters from the configuration
+        config = self.settings_configuration
+        config_id = config['InitializationSettings']['config_id']
+        start_time = config['InitializationSettings']['time']['start_time']
+        end_time = config['InitializationSettings']['time']['end_time']
+        delta_t = config['InitializationSettings']['time']['delta_t']
+        hp_power_setpoint = config['InitializationSettings']['initial_conditions']['heat_pump']['power_set_point']
+        room_temperature = config['InitializationSettings']['initial_conditions']['room']['temperature']
 
         # Initialize lists to store data for plotting
         times = []
@@ -51,7 +56,6 @@ class Manager:
             current_time = start_time + step * delta_t
             print(f"Time step {step} | Current time: {current_time:.2f}")
 
-            # Track time
             times.append(current_time)
 
             # Get model outputs for the current power setpoint
@@ -71,43 +75,31 @@ class Manager:
             print(f"New power setpoint: {hp_power_setpoint}")
             print("===========================================================")
 
-            # Track the values for plotting
             voltages.append(voltage)
             temperatures.append(room_temperature)
             power_setpoints.append(hp_power_setpoint)
             heat_productions.append(heat_production_from_hp)
 
-        # Plot the data after the simulation
-        self.plot_results(times, voltages, temperatures, power_setpoints, heat_productions)
+        self.plot_results(times, voltages, temperatures, power_setpoints, heat_productions, config_id)
 
-    def plot_results(self, times, voltages, temperatures, power_setpoints, heat_productions):
+    def plot_results(self, times, voltages, temperatures, power_setpoints, heat_productions, config_id):
         plt.style.use('ggplot')
         _, axs = plt.subplots(2, 2, figsize=(12, 8))
 
-        # Plot voltage over time
-        axs[0, 0].plot(times, voltages, label="Voltage", color='blue')
-        axs[0, 0].set_title("Voltage Over Time")
-        axs[0, 0].set_xlabel("Time  [s]")
-        axs[0, 0].set_ylabel("Voltage  [V]")
+        plots = [
+            (axs[0, 0], times, voltages, "Voltage Over Time", "Time [s]", "Voltage [V]", 'blue'),
+            (axs[0, 1], times, temperatures, "Temperature Over Time", "Time [s]", "Temperature [°C]", 'red'),
+            (axs[1, 0], times, power_setpoints, "Heat Pump Power Setpoint Over Time", "Time [s]", "Power Setpoint [kW]", 'green'),
+            (axs[1, 1], times, heat_productions, "Heat Production Over Time", "Time [s]", "Heat Production [kW]", 'orange'),
+        ]
 
-        # Plot temperature over time
-        axs[0, 1].plot(times, temperatures, label="Room Temperature", color='red')
-        axs[0, 1].set_title("Temperature Over Time")
-        axs[0, 1].set_xlabel("Time  [s]")
-        axs[0, 1].set_ylabel("Temperature  [°C]")
+        for ax, x, y, title, xlabel, ylabel, color in plots:
+            ax.plot(x, y, color=color)
+            ax.set_title(title, color='black')
+            ax.set_xlabel(xlabel, color='black')
+            ax.set_ylabel(ylabel, color='black')
+            ax.tick_params(axis='x', colors='black')
+            ax.tick_params(axis='y', colors='black')
 
-        # Plot heat pump power over time
-        axs[1, 0].plot(times, power_setpoints, label="Power Setpoint", color='green')
-        axs[1, 0].set_title("Heat Pump Power Setpoint Over Time")
-        axs[1, 0].set_xlabel("Time  [s]")
-        axs[1, 0].set_ylabel("Power Setpoint  [kW]")
-
-        # Plot heat production over time
-        axs[1, 1].plot(times, heat_productions, label="Heat Production", color='orange')
-        axs[1, 1].set_title("Heat Production Over Time")
-        axs[1, 1].set_xlabel("Time  [s]")
-        axs[1, 1].set_ylabel("Heat Production  [kW]")
-
-        # Layout and show the plot
         plt.tight_layout()
-        plt.savefig("co_simulation_results.png")
+        plt.savefig(f"results_config{config_id}.png")
