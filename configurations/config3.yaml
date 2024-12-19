@@ -3,12 +3,12 @@ InitializationSettings:
   time:
     start_time: 0  # Start time (minutes)
     end_time: 1440  # End time (minutes, 24 hours)
-    delta_t: 1  # Time step (minutes)
+    delta_t: 30  # Time step (minutes)
   initial_conditions:
     heat_pump:
       power_set_point: 100
     room:
       temperature: 15
       outside_temperature: 15  # Temperature outside the room.
-      thermal_capacitance: 500  # Represents how much heat is needed for a 1°C temperature increase.
-      thermal_resistance: 1.0  # Represents how well the room is insulated (higher R = better insulation).
+      thermal_capacitance: 5000  # Represents how much heat is needed for a 1°C temperature increase.
+      thermal_resistance: 0.01  # Represents how well the room is insulated (higher R = better insulation).

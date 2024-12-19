@@ -8,7 +8,7 @@ InitializationSettings:
     heat_pump:
       power_set_point: 100
     room:
-      temperature: 25
-      outside_temperature: 5  # Temperature outside the room.
-      thermal_capacitance: 500  # Represents how much heat is needed for a 1°C temperature increase.
-      thermal_resistance: 1.0  # Represents how well the room is insulated (higher R = better insulation).
+      temperature: 18
+      outside_temperature: 15  # Temperature outside the room.
+      thermal_capacitance: 5000  # Represents how much heat is needed for a 1°C temperature increase.
+      thermal_resistance: 0.01  # Represents how well the room is insulated (higher R = better insulation).
