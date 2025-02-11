@@ -25,6 +25,9 @@ class Manager:
     
     def __init__(self, models: list[Model], settings_configuration: dict):
         self.models = models
+        self.electric_grid = models[0]  # First model is the electric grid
+        self.heat_pump = models[1]  # Second model is the heat pump
+        self.room = models[2]  # Third model is the room
         self.controller = models[-1]  # Last model is the controller
         self.settings_configuration = settings_configuration
 
@@ -58,16 +61,10 @@ class Manager:
 
             times.append(current_time)
 
-            # Get model outputs for the current power setpoint
-            model_outputs = []
-            for model in self.models[:-2]:  # Iterate over grid and heat pump models (exclude room and controller)
-                model_output = model.calculate(hp_power_setpoint)
-                model_outputs.append(model_output)
-
-            # Assuming first output is voltage and second output is room temperature
-            voltage = model_outputs[0]  # Current voltage based on current power setpoint of heat pump
-            heat_production_from_hp = model_outputs[1]  # Heat production from heat pump based on power setpoint
-            room_temperature = self.models[2].calculate(heat_production_from_hp)  # Update room temperature
+            # Update: compute new state based on the current power setpoint of the heat pump
+            voltage = self.electric_grid.calculate(hp_power_setpoint)
+            heat_production_from_hp = self.heat_pump.calculate(hp_power_setpoint)
+            room_temperature = self.room.calculate(heat_production_from_hp)
 
             # Adjust power setpoint using the controller
             hp_power_setpoint =  self.controller.calculate(hp_power_setpoint, voltage, room_temperature)
