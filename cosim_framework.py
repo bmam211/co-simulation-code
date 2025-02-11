@@ -1,5 +1,6 @@
 """Co-simulation framework module. Contains Model and Manager classes for running the co-simulation."""
 import matplotlib.pyplot as plt
+import pandas as pd
 
 
 class Model:
@@ -38,6 +39,11 @@ class Manager:
         start_time = config['InitializationSettings']['time']['start_time']
         end_time = config['InitializationSettings']['time']['end_time']
         delta_t = config['InitializationSettings']['time']['delta_t']
+
+        # Passive consumers
+        passive_consumer_power_setpoints = pd.read_csv(config['InitializationSettings']['passive_consumers_power_setpoints'], index_col=0)
+
+        # Smart consumer
         hp_power_setpoint = config['InitializationSettings']['initial_conditions']['heat_pump']['power_set_point']
         room_temperature = config['InitializationSettings']['initial_conditions']['room']['temperature']
 
