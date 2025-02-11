@@ -56,19 +56,22 @@ class Manager:
 
         print("===============================================================")
         print(f"Starting simulation at time {start_time}, ending at {end_time}, with time step delta_t: {delta_t}\n")
-        print(f"Initial heat pump power_setpoint: {hp_power_setpoint}\n Initial heat pump temperature: {room_temperature}\n")
+        print(f"Initial heat pump power_setpoint: {hp_power_setpoint}\nInitial heat pump temperature: {room_temperature}\n")
         print("===============================================================")
 
         time_steps = int((end_time - start_time) / delta_t)
     
-        for step in range(time_steps):
-            current_time = start_time + step * delta_t
-            print(f"Time step {step} | Current time: {current_time:.2f}")
+        for time_step in range(time_steps):
+            time_clock = start_time + time_step * delta_t
 
-            times.append(current_time)
+            # Map time step to the corresponding index in the power setpoint dataframe
+            corresponding_time_in_dataframe = passive_consumer_power_setpoints.index[time_step]
+            print(f"Time step {corresponding_time_in_dataframe} | Simulation time clock: {time_clock:.2f}")
+
+            times.append(time_clock)
 
             # Update: compute new state based on the current power setpoint of the heat pump
-            voltage = self.electric_grid.calculate(hp_power_setpoint)
+            voltage = self.electric_grid.calculate(passive_consumer_power_setpoints, hp_power_setpoint, time_step)
             heat_production_from_hp = self.heat_pump.calculate(hp_power_setpoint)
             room_temperature = self.room.calculate(heat_production_from_hp)
 
