@@ -71,17 +71,18 @@ class Manager:
             times.append(time_clock)
 
             # Update: compute new state based on the current power setpoint of the heat pump
-            voltage = self.electric_grid.calculate(passive_consumer_power_setpoints, hp_power_setpoint, time_step)
+            all_consumer_voltages = self.electric_grid.calculate(passive_consumer_power_setpoints, hp_power_setpoint, time_step)
+            smart_consumer_voltage = all_consumer_voltages["consumers"]["smart_consumer"]
             heat_production_from_hp = self.heat_pump.calculate(hp_power_setpoint)
             room_temperature = self.room.calculate(heat_production_from_hp)
 
             # Adjust power setpoint using the controller
-            hp_power_setpoint =  self.controller.calculate(hp_power_setpoint, voltage, room_temperature)
+            hp_power_setpoint =  self.controller.calculate(hp_power_setpoint, smart_consumer_voltage, room_temperature)
             print("-----------------------------------------------------------")
             print(f"New power setpoint: {hp_power_setpoint}")
             print("===========================================================")
 
-            voltages.append(voltage)
+            voltages.append(smart_consumer_voltage)
             temperatures.append(room_temperature)
             power_setpoints.append(hp_power_setpoint)
             heat_productions.append(heat_production_from_hp)
