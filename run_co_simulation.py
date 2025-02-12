@@ -13,10 +13,12 @@ from room import RoomFunction
 configurations_folder_path = './configurations'
 controller_config, settings_configs = load_configurations(configurations_folder_path)
 
+print(settings_configs)
+
 # Currently, 3 settings configurations are loaded
-first_settings_config = settings_configs[0]
-second_settings_config = settings_configs[1]
-third_settings_config = settings_configs[2]
+first_settings_config = settings_configs["config 1"]
+second_settings_config = settings_configs["config 2"]
+third_settings_config = settings_configs["config 3"]
 
 # Create model instances by wrapping the functions with the Model class 
 electric_grid_model = Model(electric_grid_function)
