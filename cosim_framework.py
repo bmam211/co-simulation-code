@@ -40,8 +40,13 @@ class Manager:
         end_time = config['InitializationSettings']['time']['end_time']
         delta_t = config['InitializationSettings']['time']['delta_t']
 
+        # Grid line data
+        grid_topology = pd.read_csv(config['InitializationSettings']['grid_topology'])
+
         # Passive consumers
-        passive_consumer_power_setpoints = pd.read_csv(config['InitializationSettings']['passive_consumers_power_setpoints'], index_col=0)
+        passive_consumer_power_setpoints = pd.read_csv(
+            config['InitializationSettings']['passive_consumers_power_setpoints'], index_col=0,
+        )
 
         # Smart consumer
         hp_power_setpoint = config['InitializationSettings']['initial_conditions']['heat_pump']['power_set_point']
@@ -49,10 +54,10 @@ class Manager:
 
         # Initialize lists to store data for plotting
         times = []
-        voltages = []
-        temperatures = []
-        power_setpoints = []
-        heat_productions = []
+        smart_consumer_power_setpoint_over_time = []
+        smart_consumer_voltage_over_time = []
+        heat_pump_heat_output_over_time = []
+        temperature_over_time = []
 
         print("===============================================================")
         print(f"Starting simulation at time {start_time}, ending at {end_time}, with time step delta_t: {delta_t}\n")
@@ -68,10 +73,10 @@ class Manager:
             corresponding_time_in_dataframe = passive_consumer_power_setpoints.index[time_step]
             print(f"Time step {corresponding_time_in_dataframe} | Simulation time clock: {time_clock:.2f}")
 
-            times.append(time_clock)
-
             # Update: compute new state based on the current power setpoint of the heat pump
-            all_consumer_voltages = self.electric_grid.calculate(passive_consumer_power_setpoints, hp_power_setpoint, time_step)
+            all_consumer_voltages = self.electric_grid.calculate(
+                passive_consumer_power_setpoints, hp_power_setpoint, grid_topology, corresponding_time_in_dataframe,
+            )
             smart_consumer_voltage = all_consumer_voltages["consumers"]["smart_consumer"]
             heat_production_from_hp = self.heat_pump.calculate(hp_power_setpoint)
             room_temperature = self.room.calculate(heat_production_from_hp)
@@ -82,12 +87,20 @@ class Manager:
             print(f"New power setpoint: {hp_power_setpoint}")
             print("===========================================================")
 
-            voltages.append(smart_consumer_voltage)
-            temperatures.append(room_temperature)
-            power_setpoints.append(hp_power_setpoint)
-            heat_productions.append(heat_production_from_hp)
+            times.append(time_clock)
+            smart_consumer_power_setpoint_over_time.append(hp_power_setpoint)
+            smart_consumer_voltage_over_time.append(smart_consumer_voltage)
+            heat_pump_heat_output_over_time.append(heat_production_from_hp)
+            temperature_over_time.append(room_temperature)
 
-        self.plot_results(times, voltages, temperatures, power_setpoints, heat_productions, config_id)
+        self.plot_results(
+            times,
+            smart_consumer_voltage_over_time,
+            temperature_over_time,
+            smart_consumer_power_setpoint_over_time,
+            heat_pump_heat_output_over_time,
+            config_id,
+        )
 
     def plot_results(self, times, voltages, temperatures, power_setpoints, heat_productions, config_id):
         plt.style.use('ggplot')
