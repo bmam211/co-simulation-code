@@ -75,7 +75,6 @@ def prepare_power_flow_data(
     grid_topology_df: pd.DataFrame, active_power_df: pd.DataFrame, time_step: pd.DatetimeIndex,
 ) -> dict:
     """Prepare the data for the power flow calculation."""
-
     # Initialize line data
     num_lines = len(grid_topology_df)
     line = initialize_array(DatasetType.input, ComponentType.line, num_lines)
