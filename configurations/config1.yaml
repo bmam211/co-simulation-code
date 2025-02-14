@@ -3,7 +3,7 @@ InitializationSettings:
   time:
     start_time: 0  # Start time (minutes)
     end_time: 1440  # End time (minutes, 24 hours)
-    delta_t: 15  # Time step (minutes)
+    delta_t: 1  # Time step (minutes)
   passive_consumers_power_setpoints: data/combined_active_power.csv
   grid_topology: data/grid_topology.csv
   initial_conditions:
