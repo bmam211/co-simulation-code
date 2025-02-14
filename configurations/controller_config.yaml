@@ -1,8 +1,8 @@
 ControllerSettings:
   boundary_conditions:
-    minimum_voltage: 10  # Minimum voltage at the grid connection point.
-    maximum_voltage: 20  # Maximum voltage at the grid connection point.
-    minimum_temperature: 18  # Minimum temperature in the room.
+    minimum_voltage: 0.95  # Minimum voltage at the grid connection point.
+    maximum_voltage: 1.05  # Maximum voltage at the grid connection point.
+    minimum_temperature: 15  # Minimum temperature in the room.
     maximum_temperature: 25  # Maximum temperature in the room.
   actions:
     p_change_for_voltage: 70  # Step size for power setpoint adjustment for voltage correction.
