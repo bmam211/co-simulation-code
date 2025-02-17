@@ -18,24 +18,24 @@ def electric_grid_function(
     smart_consumer_name_in_active_power_df: str = "Customer_95",
 ) -> dict[str, float]:
     """Function to simulate power flow in an electricity grid."""
-    # Initialize voltages dictionary to store consumer voltages.
+    # 1. Initialize voltages dictionary to store consumer voltages.
     voltages = {"time step": time_step, "consumers": {}}
 
-    # Process active power data: convert active power values from kW to W and and remove unit "(kW)" from column names.
+    # 2. Process active power data: convert active power values from kW to W and and remove unit "(kW)" from column names.
     active_power_df = process_active_power_data_frame(active_power_df)
 
-    # Update active power data frame with smart consumer power setpoint
-    updated_active_power_dataframe = update_active_power_data_frame_with_smart_consumer_power_setpoint(
+    # 3. Update active power data frame with smart consumer power setpoint
+    active_power_df = update_active_power_data_frame_with_smart_consumer_power_setpoint(
         active_power_df, smart_consumer_name_in_active_power_df, smart_consumer_power_setpoint, time_step,
     )
 
-    # Run power flow for the given time step
-    consumer_voltage_dict = run_power_flow(grid_topology, updated_active_power_dataframe, time_step)
+    # 4. Run power flow for the given time step
+    consumer_voltage_dict = run_power_flow(grid_topology, active_power_df, time_step)
 
-    # Update voltages dictionary with consumer voltages
+    # 5. Update voltages dictionary with consumer voltages
     voltages["consumers"].update(consumer_voltage_dict)
 
-    # Update voltages dictionary with smart consumer voltage and rename the key to "smart_consumer"
+    # 6. Update voltages dictionary with smart consumer voltage and rename the key to "smart_consumer"
     voltages["consumers"]["smart_consumer"] = voltages["consumers"].pop(smart_consumer_name_in_active_power_df)
 
     return voltages
@@ -51,6 +51,7 @@ def update_active_power_data_frame_with_smart_consumer_power_setpoint(
     active_power_df.loc[time_step, smart_consumer_name_in_active_power_df] = smart_consumer_power_setpoint
     return active_power_df
 
+
 def run_power_flow(
     grid_topology_df: pd.DataFrame,
     active_power_df: pd.DataFrame,
@@ -59,10 +60,13 @@ def run_power_flow(
     """Run the power flow for a given time step."""
     # 1. Prepare power flow data
     input_data = prepare_power_flow_data(grid_topology_df, active_power_df, time_step)
+    
     # 2. Initialize power flow model with input data
     model = PowerGridModel(input_data)
+    
     # 3. Run power flow model
     output_data = model.calculate_power_flow()
+    
     # 4. Get node voltages
     voltages = output_data[ComponentType.node]["u_pu"].flatten().tolist()
     consumers = active_power_df.columns
@@ -127,7 +131,6 @@ def process_active_power_data_frame(active_power_df: pd.DataFrame) -> pd.DataFra
     """Convert active power values from kW to W and rename columns."""
     active_power_df = active_power_df * 1e3
     active_power_df.columns = active_power_df.columns.str.replace(" (kW)", "")
-
     return active_power_df
 
 
