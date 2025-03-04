@@ -134,15 +134,4 @@ def process_active_power_data_frame(active_power_df: pd.DataFrame) -> pd.DataFra
     return active_power_df
 
 
-# # Run script as standalone with no interaction between the models
-# if __name__ == "__main__":
-#     active_power_file = "data/combined_active_power.csv"
-#     grid_topology_file = "data/grid_topology.csv"
-
-#     active_power_df = pd.read_csv(active_power_file, index_col='snapshots', parse_dates=True)
-#     grid_topology_df = pd.read_csv(grid_topology_file)
-
-#     for time_step in active_power_df.index:
-#         print(f"Processing Time Step: {time_step}")
-#         voltages = electric_grid_function(active_power_df, 5000, grid_topology_df, time_step)
-#         print(f"Node Voltages for time step {time_step=}: {voltages}")
+# Run script as standalone with no interaction between the models ...
