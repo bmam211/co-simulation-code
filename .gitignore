@@ -1,7 +1,6 @@
 *.png
 *.log
 *.sqlite
-data/
 results/
 
 *.py[cod]
