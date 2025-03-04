@@ -45,7 +45,7 @@ class Manager:
 
         # Passive consumers
         passive_consumer_power_setpoints = pd.read_csv(
-            config['InitializationSettings']['passive_consumers_power_setpoints'], index_col=0,
+            config['InitializationSettings']['passive_consumers_power_setpoints'], index_col="snapshots", parse_dates=True,
         )
 
         # Smart consumer

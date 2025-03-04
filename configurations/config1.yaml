@@ -2,8 +2,8 @@ InitializationSettings:
   config_id: 1  # Unique configuration id (plotted results will be saved with this id)
   time:
     start_time: 0  # Start time (minutes)
-    end_time: 1440  # End time (minutes, 24 hours)
-    delta_t: 1  # Time step (minutes)
+    end_time: 44640  # End time (minutes, 31 days * 24 hours * 60 minutes)
+    delta_t: 15  # Time step (minutes)
   passive_consumers_power_setpoints: data/combined_active_power.csv
   grid_topology: data/grid_topology.csv
   initial_conditions:

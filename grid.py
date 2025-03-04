@@ -96,7 +96,7 @@ def prepare_power_flow_data(
     # Initialize node data
     node = initialize_array(DatasetType.input, ComponentType.node, 95)
     node["id"] = np.arange(1, 96)
-    node["u_rated"] = [0.23e3] * 95  # Rated voltage (230V)
+    node["u_rated"] = [0.4e3] * 95  # Rated voltage (230V)
 
     # Initialize source (slack Node)
     source = initialize_array(DatasetType.input, ComponentType.source, 1)
@@ -124,7 +124,7 @@ def prepare_power_flow_data(
 
 def calculate_reactive_power_from_active_power(active_power, power_factor: float =0.95) -> float:
     """Calculate reactive power from active power using a power factor assumed to be 0.95."""
-    return active_power * np.tan(np.arccos(power_factor))
+    return -1 *active_power * np.tan(np.arccos(power_factor))
 
 
 def process_active_power_data_frame(active_power_df: pd.DataFrame) -> pd.DataFrame:
@@ -139,7 +139,7 @@ def process_active_power_data_frame(active_power_df: pd.DataFrame) -> pd.DataFra
 #     active_power_file = "data/combined_active_power.csv"
 #     grid_topology_file = "data/grid_topology.csv"
 
-#     active_power_df = pd.read_csv(active_power_file, index_col='time')
+#     active_power_df = pd.read_csv(active_power_file, index_col='snapshots', parse_dates=True)
 #     grid_topology_df = pd.read_csv(grid_topology_file)
 
 #     for time_step in active_power_df.index:

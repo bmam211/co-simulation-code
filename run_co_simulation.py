@@ -13,33 +13,13 @@ from room import RoomFunction
 configurations_folder_path = './configurations'
 controller_config, settings_configs = load_configurations(configurations_folder_path)
 
-# Currently, 3 settings configurations are loaded
-first_settings_config = settings_configs["config 1"]
-second_settings_config = settings_configs["config 2"]
-third_settings_config = settings_configs["config 3"]
-
-# Create model instances by wrapping the functions with the Model class 
+# 2. Create model instances by wrapping the functions with the Model class 
 electric_grid_model = Model(electric_grid_function)
 heat_pump_model = Model(heat_pump_function)
+room_model = Model(RoomFunction(settings_configs["config 1"]))
 controller_model = Model(partial(controller_function, controller_settings=controller_config))
 
-# Run with the first settings_configuration
-room_model = Model(RoomFunction(first_settings_config))
-
+# 3. Run co-simulation with the given configurations
 models = [electric_grid_model, heat_pump_model, room_model, controller_model]
-manager = Manager(models, first_settings_config)
-manager.run_simulation()
-
-# Run with the second settings_configuration
-room_model = Model(RoomFunction(second_settings_config))
-
-models = [electric_grid_model, heat_pump_model, room_model, controller_model]
-manager = Manager(models, second_settings_config)
-manager.run_simulation()
-
-# Run with the third settings_configuration
-room_model = Model(RoomFunction(third_settings_config))
-
-models = [electric_grid_model, heat_pump_model, room_model, controller_model]
-manager = Manager(models, third_settings_config)
+manager = Manager(models, settings_configs["config 1"])
 manager.run_simulation()
