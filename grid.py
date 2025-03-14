@@ -140,3 +140,15 @@ def process_active_power_data_frame(active_power_df: pd.DataFrame) -> pd.DataFra
 
 
 # Run script as standalone with no interaction between the models ...
+active_power_df = pd.read_csv("data/combined_active_power.csv", index_col=0, parse_dates=True)
+grid_topology_df = pd.read_csv("data/grid_topology.csv")
+final_time_step = pd.DatetimeIndex(["2025-01-31 23:45:00"])
+
+result=electric_grid_function(active_power_df,
+                       smart_consumer_power_setpoint=5000,
+                       grid_topology=grid_topology_df,
+                       time_step=final_time_step)
+
+smart_consumer_voltage = result["consumers"]["smart_consumer"]
+
+print(smart_consumer_voltage)
