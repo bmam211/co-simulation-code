@@ -14,11 +14,11 @@ class RoomFunction:
         self.room_tc = config['InitializationSettings']['initial_conditions']['room']['thermal_capacitance']
         self.room_tr = config['InitializationSettings']['initial_conditions']['room']['thermal_resistance']
 
-    def __call__(self, heat_production_from_hp: float) -> float:
+    def __call__(self, heat_production_from_hp: float, temp :int) -> float:
         """
         Callable method to update the room temperature during the simulation."""
         # Calculate heat loss to the environment
-        heat_loss = (self.room_temp - self.outside_temp) / self.room_tr
+        heat_loss = (self.room_temp - temp) / self.room_tr
 
         # Update room temperature using the discrete-time equation
         self.room_temp += self.delta_t * (heat_production_from_hp - heat_loss) / self.room_tc

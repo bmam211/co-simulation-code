@@ -1,7 +1,6 @@
 """Electricity grid model."""
 import numpy as np
 import pandas as pd
-from pandas import DataFrame
 from power_grid_model import (
     LoadGenType,
     PowerGridModel,
@@ -10,37 +9,42 @@ from power_grid_model import (
     DatasetType,
 )
 
+df = pd.read_csv("data/combined_active_power.csv");
 
 def electric_grid_function(
     active_power_df: pd.DataFrame,
     smart_consumer_power_setpoint: float,
     grid_topology: pd.DataFrame,
     time_step: pd.DatetimeIndex,
-    smart_consumer_name_in_active_power_df: str = "Customer_95",
+    smart_consumer_names_in_active_power_df: list[str] = ["Customer_95", "Customer_94", "Customer_93", "Customer_92", "Customer_91", "Customer_90", "Customer_89", "Customer_88", "Customer_87", "Customer_86", "Customer_85", "Customer_84", "Customer_83", "Customer_82", "Customer_81", "Customer_80", "Customer_79",  "Customer_78", "Customer_77", "Customer_76", "Customer_75", "Customer_74", "Customer_73", "Customer_72", "Customer_71", "Customer_70",  "Customer_69" ,"Customer_68"],
 ) -> dict[str, float]:
-    """Function to simulate power flow in an electricity grid."""
+    """Function to simulate power flow in an electricity grid with multiple smart consumers."""
     # 1. Initialize voltages dictionary to store consumer voltages.
     voltages = {"time step": time_step, "consumers": {}}
 
-    # 2. Process active power data: convert active power values from kW to W and and remove unit "(kW)" from column names.
+    # 2. Process active power data: convert active power values from kW to W and remove unit "(kW)" from column names.
     active_power_df = process_active_power_data_frame(active_power_df)
 
-    # 3. Update active power data frame with smart consumer power setpoint
-    active_power_df = update_active_power_data_frame_with_smart_consumer_power_setpoint(
-        active_power_df, smart_consumer_name_in_active_power_df, smart_consumer_power_setpoint, time_step,
-    )
+    # 3. Update active power data frame with smart consumer power setpoint for each smart consumer.
+    for smart_consumer_name in smart_consumer_names_in_active_power_df:
+        active_power_df = update_active_power_data_frame_with_smart_consumer_power_setpoint(
+            active_power_df, smart_consumer_name, smart_consumer_power_setpoint, time_step,
+        )
 
-    # 4. Run power flow for the given time step
+    # 4. Run power flow for the given time step.
     consumer_voltage_dict = run_power_flow(grid_topology, active_power_df, time_step)
 
-    # 5. Update voltages dictionary with consumer voltages
+    # 5. Update voltages dictionary with consumer voltages.
     voltages["consumers"].update(consumer_voltage_dict)
 
+    # 6. Collect smart consumer voltages into a separate sub-dictionary under the key "smart_consumers".
+    smart_consumers_voltages = {}
+    for i in smart_consumer_names_in_active_power_df:
+        # Remove the smart consumer voltage from the main dictionary and store it in smart_consumers_voltages.
     # 6. Update voltages dictionary with smart consumer voltage and rename the key to "smart_consumer"
-    voltages["consumers"]["smart_consumer"] = voltages["consumers"].pop(smart_consumer_name_in_active_power_df)
+        voltages["consumers"]["smart_consumer"] = voltages["consumers"].pop(i)
 
     return voltages
-
 
 def update_active_power_data_frame_with_smart_consumer_power_setpoint(
     active_power_df: pd.DataFrame,
@@ -136,16 +140,3 @@ def process_active_power_data_frame(active_power_df: pd.DataFrame) -> pd.DataFra
 
 
 # Run script as standalone with no interaction between the models ...
-active_power_df = pd.read_csv("data/combined_active_power.csv", index_col=0, parse_dates=True)
-grid_topology_df = pd.read_csv("data/grid_topology.csv")
-final_time_step = pd.DatetimeIndex(["2025-01-31 23:45:00"])
-
-result=electric_grid_function(active_power_df,
-                       smart_consumer_power_setpoint=5000,
-                       grid_topology=grid_topology_df,
-                       time_step=final_time_step)
-
-smart_consumer_voltage = result["consumers"]["smart_consumer"]
-
-print(smart_consumer_voltage)
-
