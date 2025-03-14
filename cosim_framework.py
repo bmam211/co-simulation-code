@@ -3,42 +3,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-
-def generate_daily_status(delta_t: int) -> np.ndarray:
-    """
-    Generates a status array where:
-      - 1 = user is away (cannot charge EV, different temperature limits).
-      - 0 = user is at home.
-
-    Args:
-        delta_t (int): Time step in minutes.
-
-    Returns:
-        np.ndarray: Status array for the entire simulation (31 days).
-    """
-    num_days = 31
-    total_minutes = num_days * 1440  # 31 days * 1440 minutes per day
-    time_steps = total_minutes // delta_t  # Convert to simulation steps
-
-    status = np.zeros(time_steps, dtype=int)  # Default: user is home
-
-    for day in range(num_days):
-        start_of_day = day * 1440  # Start minute of the day
-
-        # Generate random leave and return times
-        leave_time = start_of_day + np.random.randint(300, 360)  # Leave (5 AM - 6 AM)
-        return_time = start_of_day + np.random.randint(1020, 1080)  # Return (5 PM - 6 PM)
-
-        # Convert to time step indices
-        leave_step = min(leave_time // delta_t, time_steps - 1)
-        return_step = min(return_time // delta_t, time_steps - 1)
-
-        # Set status to 1 (away) in this period
-        status[leave_step:return_step] = 1
-
-    return status
-
-
 class Model:
     """Wrapper class for modeling any physical process (e.g. power flow, heat production, etc.)."""
 
@@ -62,6 +26,7 @@ class Manager:
         self.heat_pump = models[1]  # Second model is the heat pump
         self.room = models[2]  # Third model is the room
         self.ev = models[3]  # EV Model
+        self.user = models[4]
         self.controller = models[-1]  # Last model is the controller
         self.settings_configuration = settings_configuration
 
@@ -108,7 +73,7 @@ class Manager:
         print("===============================================================")
 
         time_steps = int((end_time - start_time) / delta_t)
-        status = generate_daily_status(delta_t)
+        status = self.user.calculate(delta_t)
 
         for time_step in range(time_steps):
             time_clock = start_time + time_step * delta_t
@@ -164,12 +129,12 @@ class Manager:
         _, axs = plt.subplots(3, 2, figsize=(12, 10))  # Adjusted for 6 subplots
 
         plots = [
-            (axs[0, 0], times[:96], voltages[:96], "Voltage Over Time", "Time [min]", "Voltage [V]", 'blue'),
-            (axs[0, 1], times[:96], temperatures[:96], "Temperature Over Time", "Time [min]", "Temperature [°C]", 'red'),
-            (axs[1, 0], times[:96], power_setpoints[:96], "Heat Pump Power Setpoint Over Time", "Time [min]", "Power Setpoint [kW]", 'green'),
-            (axs[1, 1], times[:96], heat_productions[:96], "Heat Production Over Time", "Time [min]", "Heat Production [kW]", 'orange'),
-            (axs[2, 0], times[:96], ev_production[:96], "EV Power Production Over Time", "Time [min]", "EV Power [kW]", 'purple'),
-            (axs[2, 1], times[:96], status_over_time[:96], "User Status Over Time", "Time [min]", "Status (1=Away, 0=Home)", 'black')
+            (axs[0, 0], times, voltages, "Voltage Over Time", "Time [min]", "Voltage [V]", 'blue'),
+            (axs[0, 1], times, temperatures, "Temperature Over Time", "Time [min]", "Temperature [°C]", 'red'),
+            (axs[1, 0], times, power_setpoints, "Heat Pump Power Setpoint Over Time", "Time [min]", "Power Setpoint [kW]", 'green'),
+            (axs[1, 1], times, heat_productions, "Heat Production Over Time", "Time [min]", "Heat Production [kW]", 'orange'),
+            (axs[2, 0], times, ev_production, "EV Power Production Over Time", "Time [min]", "EV Power [kW]", 'purple'),
+            (axs[2, 1], times, status_over_time, "User Status Over Time", "Time [min]", "Status (1=Away, 0=Home)", 'black')
         ]
 
         for ax, x, y, title, xlabel, ylabel, color in plots:
