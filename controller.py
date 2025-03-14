@@ -34,11 +34,14 @@ def controller_function(
 
     # Priority 2: Adjust power based on temperature needs (only if voltage is within limits)
     if voltage_min <= voltage <= voltage_max:
-        if temperature > temp_max:
+        near_temp_min = (temperature - temp_min) < 5
+        near_temp_max = (temp_max - temperature) < 5
+        if near_temp_max:
             power_set_point_hp -= p_adjust_step_size_temp
             print("Temperature is too high, reducing heat pump power setpoint of heatpump to cool down.")
-        elif temperature < temp_min:
+        elif near_temp_min:
             power_set_point_hp += p_adjust_step_size_temp
             print("Temperature is too low, increasing heat pump power setpoint of heatpump to warm up.")
-
+        else:
+            print("Temperature within a comfortable range, no major adjustment")
     return power_set_point_hp

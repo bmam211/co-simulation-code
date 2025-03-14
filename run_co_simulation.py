@@ -37,3 +37,4 @@ room_model = Model(RoomFunction(third_settings_config))
 models = [electric_grid_model, heat_pump_model, room_model, controller_model]
 manager = Manager(models, third_settings_config)
 manager.run_simulation()
+#manager.plot_results()
