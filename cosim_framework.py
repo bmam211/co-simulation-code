@@ -64,8 +64,9 @@ class Manager:
         self.ev = models[3]  # EV Model
         self.controller = models[-1]  # Last model is the controller
         self.settings_configuration = settings_configuration
+        self.results = None
 
-    def run_simulation(self):
+    def run_simulation(self, df):
         temp_rise = np.linspace(0, 15, num=48, endpoint=True)
         temp_fall = np.linspace(0, 15, num=48, endpoint=True)
         temp_day = np.concatenate((temp_rise, temp_fall))
@@ -82,10 +83,11 @@ class Manager:
         grid_topology = pd.read_csv(config['InitializationSettings']['grid_topology'])
 
         # Passive consumers
-        passive_consumer_power_setpoints = pd.read_csv(
-            config['InitializationSettings']['passive_consumers_power_setpoints'], index_col="snapshots",
-            parse_dates=True,
-        )
+        passive_consumer_power_setpoints = df
+        #passive_consumer_power_setpoints = pd.read_csv(
+        #    config['InitializationSettings']['passive_consumers_power_setpoints'], index_col="snapshots",
+        #    parse_dates=True,
+        #)
 
         # Smart consumer
         hp_power_setpoint = config['InitializationSettings']['initial_conditions']['heat_pump']['power_set_point']
@@ -93,13 +95,14 @@ class Manager:
         ev_power = config['InitializationSettings']['initial_conditions']['ev']['power']  # Initialize once
 
         # Initialize lists to store data for plotting
-        times = []
-        smart_consumer_power_setpoint_over_time = []
-        smart_consumer_voltage_over_time = []
-        heat_pump_heat_output_over_time = []
-        temperature_over_time = []
-        ev_over_time = []
-        status_over_time = []  # Store status for plotting
+        results = {
+            "times": [],
+            "smart_consumer_voltage": [],
+            "temperature": [],
+            "hp_power_setpoint": [],
+            "heat_production": [],
+            "ev_power": [],
+        } # Store status for plotting
 
         print("===============================================================")
         print(f"Starting simulation at time {start_time}, ending at {end_time}, with time step delta_t: {delta_t}\n")
@@ -140,41 +143,59 @@ class Manager:
             print(f"User Status: {'Away' if current_status == 1 else 'Home'}")  # Debugging status
             print("===========================================================")
 
-            times.append(time_clock)
-            smart_consumer_power_setpoint_over_time.append(hp_power_setpoint)
-            smart_consumer_voltage_over_time.append(smart_consumer_voltage)
-            heat_pump_heat_output_over_time.append(heat_production_from_hp)
-            temperature_over_time.append(room_temperature)
-            ev_over_time.append(ev_power)  # Store updated EV power
-            status_over_time.append(current_status)  # Store status
+            results["times"].append(time_clock)
+            results["smart_consumer_voltage"].append(smart_consumer_voltage)
+            results["temperature"].append(room_temperature)
+            results["hp_power_setpoint"].append(hp_power_setpoint)
+            results["heat_production"].append(heat_production_from_hp)
+            results["ev_power"].append(ev_power)  # Store status
 
-        self.plot_results(
-            times,
-            smart_consumer_voltage_over_time,
-            temperature_over_time,
-            smart_consumer_power_setpoint_over_time,
-            heat_pump_heat_output_over_time,
-            ev_over_time,  # Include EV data in the plot
-            status_over_time,  # Include user status in the plot
-            config_id,
-        )
+        return results
 
-    def plot_results(self, times, voltages, temperatures, power_setpoints, heat_productions, ev_production, status_over_time, config_id):
+
+
+    def store_results(self, results):
+        self.results = results
+
+    def compare_results(self, forecasted_results):
+        if self.results is None:
+            print("ERROR: No original results to compare!")
+            return
+
+        print("Comparing original vs. forecasted simulation results:")
+        for key in self.results.keys():
+            if key != "times":  # Skip time values
+                original_avg = np.mean(self.results[key])
+                forecasted_avg = np.mean(forecasted_results[key])
+                print(f"{key}: Original Avg = {original_avg:.3f}, Forecasted Avg = {forecasted_avg:.3f}")
+
+            # ✅ Call the plot function
+        self.plot_results(self.results, forecasted_results)
+
+    def plot_results(self, original_results, forecasted_results):
+        """✅ Updates plot_results to compare original and forecasted simulations."""
+
         plt.style.use('ggplot')
-        _, axs = plt.subplots(3, 2, figsize=(12, 10))  # Adjusted for 6 subplots
+        _, axs = plt.subplots(3, 2, figsize=(12, 10))
 
-        plots = [
-            (axs[0, 0], times[:96], voltages[:96], "Voltage Over Time", "Time [min]", "Voltage [V]", 'blue'),
-            (axs[0, 1], times[:96], temperatures[:96], "Temperature Over Time", "Time [min]", "Temperature [°C]", 'red'),
-            (axs[1, 0], times[:96], power_setpoints[:96], "Heat Pump Power Setpoint Over Time", "Time [min]", "Power Setpoint [kW]", 'green'),
-            (axs[1, 1], times[:96], heat_productions[:96], "Heat Production Over Time", "Time [min]", "Heat Production [kW]", 'orange'),
-            (axs[2, 0], times[:96], ev_production[:96], "EV Power Production Over Time", "Time [min]", "EV Power [kW]", 'purple'),
-            (axs[2, 1], times[:96], status_over_time[:96], "User Status Over Time", "Time [min]", "Status (1=Away, 0=Home)", 'black')
+        metrics = [
+            ("smart_consumer_voltage", "Voltage [V]", 'blue'),
+            ("temperature", "Temperature [°C]", 'red'),
+            ("hp_power_setpoint", "Power Setpoint [kW]", 'green'),
+            ("heat_production", "Heat Production [kW]", 'orange'),
+            ("ev_power", "EV Power [kW]", 'purple'),
         ]
 
-        for ax, x, y, title, xlabel, ylabel, color in plots:
-            ax.plot(x, y, color=color)
-            ax.set_title(title, color='black')
+        for i, (metric, ylabel, color) in enumerate(metrics):
+            ax = axs[i // 2, i % 2]
+            ax.plot(original_results["times"], original_results[metric], color='black', linestyle='dashed',
+                    label="Original")
+            ax.plot(forecasted_results["times"], forecasted_results[metric], color=color, linestyle='solid',
+                    label="Forecasted")
+            ax.set_title(f"{metric.replace('_', ' ').title()} Over Time")
+            ax.set_ylabel(ylabel)
+            ax.legend()
 
         plt.tight_layout()
-        plt.savefig(f"results_config{config_id}.png")
+        plt.show()
+
