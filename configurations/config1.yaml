@@ -12,7 +12,7 @@ InitializationSettings:
     room:
       temperature: 15  # Initial temperature in the room.
       outside_temperature: 15  # Temperature outside the room.
-      thermal_capacitance: 5000  #6000000 Represents how much heat is needed for a 1°C temperature increase.
-      thermal_resistance:   0.01  # 0.0025 Represents how well the room is insulated (higher R = better insulation).
+      thermal_capacitance: 6000000  #6000000 Represents how much heat is needed for a 1°C temperature increase.
+      thermal_resistance:   0.0025 # 0.0025 Represents how well the room is insulated (higher R = better insulation).
     ev:
       power: 0

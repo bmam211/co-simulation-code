@@ -1,6 +1,5 @@
 import numpy as np  # Import NumPy first
 
-
 def generate_daily_status(delta_t: int) -> np.ndarray:
     """
     Generates a status array where:
