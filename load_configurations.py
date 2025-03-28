@@ -1,9 +1,11 @@
 """Functions for loading simulation configurations from YAML files."""
 import os
+
+import pandas as pd
 import yaml
 
 
-def load_configurations(configurations_folder_path: str) -> tuple[dict, list[dict[str, dict]]]:
+def load_configurations(configurations_folder_path: str, use_forecasted: bool) -> tuple[dict, list[dict[str, dict]]]:
     """Load configurations from YAML files in the specified folder path."""
 
     config_files = [f for f in os.listdir(configurations_folder_path) if f.endswith('.yaml')]
@@ -22,5 +24,13 @@ def load_configurations(configurations_folder_path: str) -> tuple[dict, list[dic
             except KeyError as e:
                 raise KeyError(f"Configuration file {config_file} is missing the 'config_id' key.") from e
             initialization_configurations[f"config {config_id}"] = config_data
-    
-    return controller_configuration, initialization_configurations
+
+    dataset_file = "combined_active_power_forecasted.csv" if use_forecasted else "combined_active_power.csv"
+    dataset_path = os.path.join('./data', dataset_file)
+
+    try:
+        df = pd.read_csv(dataset_path, index_col="snapshots", parse_dates=True)
+    except FileNotFoundError:
+        raise FileNotFoundError(f"Dataset file {dataset_path} not found.")
+
+    return controller_configuration, initialization_configurations, df
