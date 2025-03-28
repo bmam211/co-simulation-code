@@ -1,4 +1,4 @@
-def adjust_power(power: float, status: int) -> float:
+def adjust_power(power_set_point_ev: float, status: int) -> float:
     """
     Adjusts EV charging power based on user status.
     - If user is home (status = 0) and power < 25000, increase by 500.
@@ -15,7 +15,7 @@ def adjust_power(power: float, status: int) -> float:
 
     if status == 1:
         return 0  # Stop charging when user is away
-    elif power < 25000:
-        return min(power + 500, 25000)  # Charge while at home, but cap at 25000
+    elif power_set_point_ev < 23000:
+        return min(power_set_point_ev + 575, 23000)  # Charge while at home, but cap at 25000
     else:
-        return power  # Maintain power at max if already full
+        return power_set_point_ev  # Maintain power at max if already full
