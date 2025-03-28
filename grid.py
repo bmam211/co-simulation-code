@@ -9,7 +9,7 @@ from power_grid_model import (
     DatasetType,
 )
 
-df = pd.read_csv("data/combined_active_power.csv");
+#df = pd.read_csv("data/combined_active_power.csv");
 
 def electric_grid_function(
     active_power_df: pd.DataFrame,
