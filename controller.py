@@ -39,15 +39,15 @@ def controller_function(
                 power_set_point_hp -= p_adjust_step_size_temp
                 if near_temp_max:
                     power_set_point_hp -= p_adjust_step_size_temp
-                if power < 25000:  # Ensure power is below 25000 before increasing
-                    power_set_point_hp += 500
+                if power < 23000:  # Ensure power is below 25000 before increasing
+                    power_set_point_hp += 575
                 print("Temperature is too high, reducing heat pump power setpoint to cool down.")
             elif temperature < temp_min:
                 near_temp_min = (temperature - temp_min) < 5
                 if near_temp_min:
                     power_set_point_hp += p_adjust_step_size_temp
-                if power < 25000:  # Ensure power is below 25000 before increasing
-                    power_set_point_hp += 500
+                if power < 23000:  # Ensure power is below 25000 before increasing
+                    power_set_point_hp += 575
                 print("Temperature is too low, increasing heat pump power setpoint to warm up.")
 
     if status == 1:
